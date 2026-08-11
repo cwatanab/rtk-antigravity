@@ -28,6 +28,7 @@ process.stdin.on('end', () => {
     }
 
     // rtk rewrite でコマンドを書き換え
+    // 書き換え成功時は exit code 3 を返す仕様のため、throw 時も stdout を採用する
     let rewritten;
     try {
       const result = execFileSync('rtk', ['rewrite', command], {
@@ -36,9 +37,12 @@ process.stdin.on('end', () => {
         stdio: ['pipe', 'pipe', 'pipe'],
       });
       rewritten = result.trim();
-    } catch (_e) {
-      // rtk が未インストール、またはタイムアウト — スルー
-      process.exit(0);
+    } catch (e) {
+      if (!e.stdout) {
+        // rtk が未インストール、またはタイムアウト — スルー
+        process.exit(0);
+      }
+      rewritten = String(e.stdout).trim();
     }
 
     // 書き換えなし (空 or 同じコマンド) の場合はスルー
