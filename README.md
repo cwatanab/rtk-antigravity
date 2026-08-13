@@ -1,5 +1,8 @@
 # rtk-antigravity
 
+> [!NOTE]
+> 本リポジトリは、Addmotion において [rtk-ai/rtk#2093](https://github.com/rtk-ai/rtk/pull/2093) がマージされるまでの暫定対応プラグインです。
+
 [RTK (Rust Token Killer)](https://github.com/rtk-ai/rtk) を [Google Antigravity](https://antigravity.google) プラグインとして統合するリポジトリ。
 
 `agy plugin install` で導入すると、エージェントが実行するシェルコマンドを自動的に `rtk <cmd>` 形式へ書き換え、LLM コンテキストへ届く bash 出力を最大 90% 削減する。
@@ -43,11 +46,12 @@ agy plugin uninstall rtk-antigravity
 
 ### PreToolUse フック
 
-エージェントが `run_shell_command` ツールでシェルコマンドを実行しようとすると、フックが介入して `rtk rewrite <cmd>` を呼び出す。書き換えが必要なコマンドは自動的に `rtk <cmd>` 形式に変換される。
+エージェントが `run_command` や `run_shell_command` ツールでシェルコマンドを実行しようとすると、フックが介入して `rtk rewrite <cmd>` を呼び出す。書き換えが必要なコマンドは自動的に `rtk <cmd>` 形式に変換される。
 
 ```
-エージェント: "git status" を実行
+エージェント: "git status" を実行 (`CommandLine: "git status"`)
   → フック: rtk rewrite "git status" → "rtk git status"
+  → レスポンス: { decision: "allow", overwrite: { CommandLine: "rtk git status" } }
   → エージェント: "rtk git status" を実行（出力が最大 80% 削減）
 ```
 
@@ -85,7 +89,7 @@ agy plugin install
 エージェントがコマンドを実行するたびに
   → pre-tool-use.js が起動 (bun または node)
   → rtk rewrite <cmd> でコマンドを最適化
-  → 最適化済みコマンドをエージェントに返す
+  → 最適化済みコマンド ({ decision: "allow", overwrite: ... }) をエージェントに返す
 ```
 
 ## トラブルシューティング
