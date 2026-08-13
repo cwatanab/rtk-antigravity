@@ -8,7 +8,7 @@
 
 ### 前提条件
 
-rtk 本体がインストールされていること:
+1. **rtk 本体**:
 
 ```bash
 # Homebrew (macOS/Linux)
@@ -21,6 +21,11 @@ cargo install --git https://github.com/rtk-ai/rtk
 rtk --version  # "rtk 0.x.x" が表示されるはず
 rtk gain       # トークン節約統計が表示されるはず
 ```
+
+2. **JavaScript ランタイム**:
+- [Bun](https://bun.sh)（**推奨**: プロセス起動が極めて高速なためフック実行のオーバーヘッドを最小化できます）
+- または [Node.js](https://nodejs.org) (v18+)
+  - デフォルトでは `bun` で実行する設定になっています。Node.js を使用する場合は `hooks.json` の `"command"` を `"node ./hooks/pre-tool-use.js"` に変更してください。
 
 ### プラグインのインストール
 
@@ -48,10 +53,6 @@ agy plugin uninstall rtk-antigravity
 
 rtk が未インストールの場合や書き換え不要なコマンドは透過的にスルーするため、動作が止まることはない。
 
-### rtk スキル
-
-`rtk-antigravity` スキルがエージェントに rtk の使い方を教える。エージェントは `rtk <cmd>` を積極的に使うようになる。
-
 ### 対応コマンド
 
 | カテゴリ | 例 | 削減率 |
@@ -69,12 +70,9 @@ rtk が未インストールの場合や書き換え不要なコマンドは透�
 ```
 rtk-antigravity/
 ├── plugin.json          # Antigravity プラグイン識別子
-├── hooks.json           # フック登録設定
-├── hooks/
-│   └── pre-tool-use.js  # PreToolUse フック (Node.js)
-└── skills/
-    └── rtk/
-        └── SKILL.md     # rtk の使い方を教えるスキル定義
+├── hooks.json           # フック登録設定 (Bun / Node.js 実行)
+└── hooks/
+    └── pre-tool-use.js  # PreToolUse フック (Bun / Node.js 両対応)
 ```
 
 ## 動作の仕組み
@@ -83,10 +81,9 @@ rtk-antigravity/
 agy plugin install
   → plugin.json を認識してプラグインとして登録
   → hooks.json の PreToolUse フックを Antigravity に登録
-  → skills/rtk/SKILL.md をスキルとして登録
 
 エージェントがコマンドを実行するたびに
-  → pre-tool-use.js が起動
+  → pre-tool-use.js が起動 (bun または node)
   → rtk rewrite <cmd> でコマンドを最適化
   → 最適化済みコマンドをエージェントに返す
 ```

@@ -1,17 +1,16 @@
 {
-  "hooks": {
+  "rtk": {
     "PreToolUse": [
       {
-        "matcher": "run_shell_command",
+        "matcher": "run_command|run_shell_command",
         "hooks": [
           {
             "type": "command",
-            "command": "node \"${ANTIGRAVITY_PLUGIN_ROOT}/hooks/pre-tool-use.js\"",
-            "shell": "bash",
-            "async": false
+            "command": "bun ./hooks/pre-tool-use.js"
           }
         ]
       }
     ]
   }
 }
+
